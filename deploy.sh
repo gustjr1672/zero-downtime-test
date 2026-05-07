@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # 1. 현재 Nginx가 바라보고 있는 타겟 확인
-CURRENT_TARGET=$(docker exec nginx-proxy \
+CURRENT_TARGET=$(docker compose exec -T nginx-proxy \
   grep 'server api-' /etc/nginx/nginx.conf \
   | awk -F'server ' '{print $2}' \
-  | awk -F':' '{print $1}')
+  | awk -F':' '{print $1}' | tr -d '\r')
  
 echo "CURRENT_TARGET=[$CURRENT_TARGET]"
 
