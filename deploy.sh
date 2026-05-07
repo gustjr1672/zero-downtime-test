@@ -1,18 +1,17 @@
 ﻿#!/bin/bash
 
 # 1. 현재 Nginx가 바라보고 있는 타겟 확인
-IS_GREEN=$(docker ps | grep api-green)
+CURRENT_TARGET=$(docker exec nginx-proxy \
+  grep 'server api-' /etc/nginx/nginx.conf \
+  | awk -F'server ' '{print $2}' \
+  | awk -F':' '{print $1}')
 
-if [ -n "$IS_GREEN" ]; then
-    echo " 현재 Green이 동작 중입니다. 교대조인 Blue 배포를 준비합니다."
-    NEW_TARGET="api-blue"
-    OLD_TARGET="api-green"
-    NEW_PORT="8080"
-else
-    echo " 현재 Blue가 동작 중입니다. 교대조인 Green 배포를 준비합니다."
+if [ "$CURRENT_TARGET" == "api-blue" ]; then
     NEW_TARGET="api-green"
     OLD_TARGET="api-blue"
-    NEW_PORT="8081"
+else
+    NEW_TARGET="api-blue"
+    OLD_TARGET="api-green"
 fi
 
 echo " 배포 시작: 새로운 버전($NEW_TARGET)을 준비합니다."
@@ -50,6 +49,8 @@ echo " Nginx 트래픽을 $NEW_TARGET 으로 전환합니다."
 sed -i "s/server api-[a-z]*:8080;/server $NEW_TARGET:8080;/g" nginx.conf
 #sed -i "s/server $OLD_TARGET:8080;/server $NEW_TARGET:8080;/g" nginx.conf
 
+docker cp nginx.conf nginx-proxy:/etc/nginx/nginx.conf
+
 # Nginx 컨테이너 리로드 (Docker Compose로 접근)
 docker compose exec nginx-proxy nginx -s reload
 
@@ -61,5 +62,3 @@ echo " 트래픽 전환 완료. 구버전($OLD_TARGET)을 종료합니다."
 docker compose stop $OLD_TARGET
 
 echo " 무중단 배포($NEW_TARGET)가 완료되었습니다!"
-
-# 줄바꿈(LF) 수정용 주석
