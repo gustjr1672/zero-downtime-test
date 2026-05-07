@@ -4,6 +4,7 @@
 services:
   nginx-proxy:
     image: nginx:latest
+    container_name: nginx-proxy #container_name 지정안하면 [프로젝트 폴더명]-[서비스명]-[번호] zero-downtime-test-nginx-proxy-1
     ports:
       - "80:80"
     volumes:
