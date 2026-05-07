@@ -10,6 +10,6 @@ app.MapHealthChecks("/health");
 
 // 버전 확인을 위한 간단한 API (Blue/Green 구분용)
 //app.MapGet("/", () => "Hello! This is Version 4.0 (Blue)");
-app.MapGet("/", () => "Hello! This is Version 7.0 (Green)");
+app.MapGet("/", () => "Hello! This is Version 8.0 (Green)");
 
 app.Run();
