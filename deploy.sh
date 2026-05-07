@@ -47,7 +47,8 @@ fi
 
 # 5. Nginx 스위칭
 echo " Nginx 트래픽을 $NEW_TARGET 으로 전환합니다."
-sed -i "s/server $OLD_TARGET:8080;/server $NEW_TARGET:8080;/g" nginx.conf
+sed -i "s/server api-[a-z]*:8080;/server $NEW_TARGET:8080;/g" nginx.conf
+#sed -i "s/server $OLD_TARGET:8080;/server $NEW_TARGET:8080;/g" nginx.conf
 
 # Nginx 컨테이너 리로드 (Docker Compose로 접근)
 docker compose exec nginx-proxy nginx -s reload
