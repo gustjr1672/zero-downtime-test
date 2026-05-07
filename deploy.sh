@@ -48,13 +48,16 @@ fi
 
 # 5. Nginx 스위칭
 echo " Nginx 트래픽을 $NEW_TARGET 으로 전환합니다."
-sed -i "s/server api-[a-z]*:8080;/server $NEW_TARGET:8080;/g" nginx.conf
-#sed -i "s/server $OLD_TARGET:8080;/server $NEW_TARGET:8080;/g" nginx.conf
+sed -i "s/server .*:8080;/server $NEW_TARGET:8080;/g" nginx.conf
+sed -i 's/\r//g' nginx.conf
 
 docker cp nginx.conf nginx-proxy:/etc/nginx/nginx.conf
 
-# Nginx 컨테이너 리로드 (Docker Compose로 접근)
-docker compose exec nginx-proxy nginx -s reload
+# 문법 검사: Nginx에게 대본에 문제 없는지 먼저 확인받음
+docker compose exec -T nginx-proxy nginx -t
+
+# 리로드: 완벽하게 확인된 상태에서 새로고침!
+docker compose exec -T nginx-proxy nginx -s reload
 
 echo "Nginx 교대 대기 중... (5초)"
 sleep 5
