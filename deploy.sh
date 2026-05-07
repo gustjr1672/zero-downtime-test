@@ -5,6 +5,8 @@ CURRENT_TARGET=$(docker exec nginx-proxy \
   grep 'server api-' /etc/nginx/nginx.conf \
   | awk -F'server ' '{print $2}' \
   | awk -F':' '{print $1}')
+ 
+echo $CURRENT_TARGET
 
 if [ "$CURRENT_TARGET" == "api-blue" ]; then
     NEW_TARGET="api-green"
