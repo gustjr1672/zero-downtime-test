@@ -47,6 +47,9 @@ sed -i "s/server $OLD_TARGET:8080;/server $NEW_TARGET:8080;/g" nginx.conf
 # Nginx 컨테이너 리로드 (Docker Compose로 접근)
 docker compose exec nginx-proxy nginx -s reload
 
+echo "Nginx 교대 대기 중... (5초)"
+sleep 5
+
 # 6. 구버전 내리기
 echo " 트래픽 전환 완료. 구버전($OLD_TARGET)을 종료합니다."
 docker compose stop $OLD_TARGET
