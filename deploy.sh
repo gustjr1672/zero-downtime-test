@@ -1,23 +1,21 @@
 #!/bin/bash
 
 # 1. 현재 Nginx가 바라보고 있는 타겟 확인
-CURRENT_TARGET=$(docker compose exec -T nginx-proxy \
-  grep 'server api-' /etc/nginx/nginx.conf \
-  | awk -F'server ' '{print $2}' \
-  | awk -F':' '{print $1}' | tr -d '\r')
- 
-echo "CURRENT_TARGET=[$CURRENT_TARGET]"
+IS_GREEN=$(docker ps | grep zero-downtime-test-api-green-1)
 
-if [ "$CURRENT_TARGET" == "api-blue" ]; then
-    NEW_TARGET="api-green"
-    OLD_TARGET="api-blue"
-    NEW_PORT="8081"
-else
+if [ -n "$IS_GREEN" ]; then
+    CURRENT_TARGET="api-green"
     NEW_TARGET="api-blue"
     OLD_TARGET="api-green"
     NEW_PORT="8080"
+else
+    CURRENT_TARGET="api-blue"
+    NEW_TARGET="api-green"
+    OLD_TARGET="api-blue"
+    NEW_PORT="8081"
 fi
 
+echo "CURRENT_TARGET=[$CURRENT_TARGET]"
 echo " 배포 시작: 새로운 버전($NEW_TARGET)을 준비합니다."
 
 # 2. 이미지 태그 생성 및 환경변수 주입 (Compose가 사용할 수 있도록)
