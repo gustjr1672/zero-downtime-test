@@ -52,3 +52,5 @@ echo " 트래픽 전환 완료. 구버전($OLD_TARGET)을 종료합니다."
 docker compose stop $OLD_TARGET
 
 echo " 무중단 배포($NEW_TARGET)가 완료되었습니다!"
+
+# 줄바꿈(LF) 수정용 주석
