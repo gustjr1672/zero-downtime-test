@@ -19,7 +19,7 @@ echo " 배포 시작: 새로운 버전($NEW_TARGET)을 준비합니다."
 export IMAGE_TAG="v$(date +%s)"
 
 # 3. 새로운 타겟만 백그라운드로 빌드 및 실행 (이때 기존 타겟은 건드리지 않음)
-docker-compose up -d --build $NEW_TARGET
+docker compose up -d --build $NEW_TARGET
 
 # 4. 헬스 체크
 echo "헬스 체크 진행 중... (http://localhost:$NEW_PORT/health)"
@@ -36,7 +36,7 @@ done
 
 if [ "$STATUS_CODE" != "200" ]; then
     echo "헬스 체크 실패! 새 컨테이너를 내립니다."
-    docker-compose stop $NEW_TARGET
+    docker compose stop $NEW_TARGET
     exit 1
 fi
 
@@ -45,10 +45,10 @@ echo " Nginx 트래픽을 $NEW_TARGET 으로 전환합니다."
 sed -i "s/server $OLD_TARGET:8080;/server $NEW_TARGET:8080;/g" nginx.conf
 
 # Nginx 컨테이너 리로드 (Docker Compose로 접근)
-docker-compose exec nginx-proxy nginx -s reload
+docker compose exec nginx-proxy nginx -s reload
 
 # 6. 구버전 내리기
 echo " 트래픽 전환 완료. 구버전($OLD_TARGET)을 종료합니다."
-docker-compose stop $OLD_TARGET
+docker compose stop $OLD_TARGET
 
 echo " 무중단 배포($NEW_TARGET)가 완료되었습니다!"
