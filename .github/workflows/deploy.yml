@@ -1,1 +1,23 @@
-﻿
+﻿name: Zero-Downtime Deployment (Self-Hosted)
+
+# 언제 실행할 것인가? GitHub 웹페이지에서 수동으로 버튼을 누를 때도 실행 가능
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      # 1. GitHub 창고에 있는 최신 코드를 가상머신으로 다운로드
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. 다운로드한 폴더 안의 deploy.sh 스크립트 실행
+      - name: Execute Deployment Script
+        run: |
+          # 스크립트에 실행 권한 부여
+          chmod +x deploy.sh
+          
+          # 쉘 스크립트 실행 (이 안에서 도커 빌드, 무중단 스위칭이 다 일어납니다)
+          bash deploy.sh
