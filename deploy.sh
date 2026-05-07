@@ -9,9 +9,11 @@ CURRENT_TARGET=$(docker exec nginx-proxy \
 if [ "$CURRENT_TARGET" == "api-blue" ]; then
     NEW_TARGET="api-green"
     OLD_TARGET="api-blue"
+    NEW_PORT="8081"
 else
     NEW_TARGET="api-blue"
     OLD_TARGET="api-green"
+    NEW_PORT="8080"
 fi
 
 echo " 배포 시작: 새로운 버전($NEW_TARGET)을 준비합니다."
