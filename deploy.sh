@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 
 # 1. 현재 Nginx가 바라보고 있는 타겟 확인
 CURRENT_TARGET=$(docker exec nginx-proxy \
