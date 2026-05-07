@@ -1,16 +1,18 @@
 ﻿#!/bin/bash
 
 # 1. 현재 Nginx가 바라보고 있는 타겟 확인
-CURRENT_TARGET=$(cat nginx.conf | grep 'server api-' | awk -F'server ' '{print $2}' | awk -F':' '{print $1}')
+IS_GREEN=$(docker ps | grep api-green)
 
-if [ "$CURRENT_TARGET" == "api-blue" ]; then
-    NEW_TARGET="api-green"
-    OLD_TARGET="api-blue"
-    NEW_PORT="8081"
-else
+if [ -n "$IS_GREEN" ]; then
+    echo " 현재 Green이 동작 중입니다. 교대조인 Blue 배포를 준비합니다."
     NEW_TARGET="api-blue"
     OLD_TARGET="api-green"
     NEW_PORT="8080"
+else
+    echo " 현재 Blue가 동작 중입니다. 교대조인 Green 배포를 준비합니다."
+    NEW_TARGET="api-green"
+    OLD_TARGET="api-blue"
+    NEW_PORT="8081"
 fi
 
 echo " 배포 시작: 새로운 버전($NEW_TARGET)을 준비합니다."
@@ -33,6 +35,9 @@ do
     echo "대기 중... ($i/10)"
     sleep 2
 done
+
+echo "도커 네트워크 및 C# 앱 워밍업 대기 중... (3초)"
+sleep 3
 
 if [ "$STATUS_CODE" != "200" ]; then
     echo "헬스 체크 실패! 새 컨테이너를 내립니다."
