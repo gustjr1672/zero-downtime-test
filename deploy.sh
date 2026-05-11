@@ -54,6 +54,8 @@ sed "s/server .*:8080;/server $NEW_TARGET:8080;/g" nginx.conf > nginx.tmp
 cat nginx.tmp > nginx.conf
 rm nginx.tmp
 
+cat nginx.conf | docker compose exec -T nginx-proxy sh -c 'cat > /etc/nginx/nginx.conf' # 가상머신 특유의 '파일 동기화 지연(Sync Delay)' 현상 때문에 추가함
+
 #docker cp nginx.conf nginx-proxy:/etc/nginx/nginx.conf
 
 # 문법 검사: Nginx에게 대본에 문제 없는지 먼저 확인받음
@@ -62,8 +64,8 @@ docker compose exec -T nginx-proxy nginx -t
 # 리로드: 완벽하게 확인된 상태에서 새로고침!
 docker compose exec -T nginx-proxy nginx -s reload
 
-echo "Nginx 교대 대기 중... (5초)"
-sleep 5
+echo "Nginx 교대 대기 중... (2초)"
+sleep 2
 
 # 6. 구버전 내리기
 echo " 트래픽 전환 완료. 구버전($OLD_TARGET)을 종료합니다."
