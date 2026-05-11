@@ -5,6 +5,7 @@ services:
   nginx-proxy:
     image: nginx:latest
     container_name: nginx-proxy #container_name 지정안하면 [프로젝트 폴더명]-[서비스명]-[번호] zero-downtime-test-nginx-proxy-1
+    restart: unless-stopped   # 추가: 명시적으로 끄지 않는 한 계속 재시작!
     ports:
       - "80:80"
     volumes:
@@ -13,11 +14,13 @@ services:
   api-blue:
     image: zero-api:${IMAGE_TAG:-latest}
     build: .
+    restart: unless-stopped
     ports:
       - "8080:8080" # 외부 헬스체크용 포트 개방
 
   api-green:
     image: zero-api:${IMAGE_TAG:-latest}
     build: .
+    restart: unless-stopped
     ports:
       - "8081:8080" # 외부 헬스체크용 포트 개방
