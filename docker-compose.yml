@@ -9,9 +9,6 @@ services:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - api-blue
-      - api-green
 
   api-blue:
     image: zero-api:${IMAGE_TAG:-latest}

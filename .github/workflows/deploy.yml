@@ -21,3 +21,6 @@ jobs:
           
           # 쉘 스크립트 실행 (이 안에서 도커 빌드, 무중단 스위칭이 다 일어납니다)
           bash deploy.sh
+
+
+# Environments Required reviewers => 승인 후 배포에 대해서 알아보기
