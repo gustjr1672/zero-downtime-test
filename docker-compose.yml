@@ -1,4 +1,4 @@
-﻿version: '3.8'
+﻿#version: '3.8'
 
 # Nginx는 API 컨테이너들과 같은 네트워크를 씁니다.
 services:
@@ -8,7 +8,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx_config:/etc/nginx/nginx.conf.d
+      - ./nginx.conf:/etc/nginx/nginx.conf
 
   api-blue:
     image: zero-api:${IMAGE_TAG:-latest}
