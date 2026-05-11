@@ -66,4 +66,9 @@ sleep 5
 echo " 트래픽 전환 완료. 구버전($OLD_TARGET)을 종료합니다."
 docker compose stop $OLD_TARGET
 
+
+#재부팅 시에 last버전을 볼 수 있도록 env파일에 기록
+echo "IMAGE_TAG=${IMAGE_TAG}" > .env
+echo "LAST_TARGET=${NEW_TARGET}" >> .env
+
 echo " 무중단 배포($NEW_TARGET)가 완료되었습니다!"
