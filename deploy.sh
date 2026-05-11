@@ -48,10 +48,13 @@ fi
 
 # 5. Nginx 스위칭
 echo " Nginx 트래픽을 $NEW_TARGET 으로 전환합니다."
-sed -i "s/server .*:8080;/server $NEW_TARGET:8080;/g" nginx.conf
-sed -i 's/\r//g' nginx.conf
+#sed -i "s/server .*:8080;/server $NEW_TARGET:8080;/g" nginx.conf
+#sed -i 's/\r//g' nginx.conf
+sed "s/server .*:8080;/server $NEW_TARGET:8080;/g" nginx.conf > nginx.tmp
+cat nginx.tmp > nginx.conf
+rm nginx.tmp
 
-docker cp nginx.conf nginx-proxy:/etc/nginx/nginx.conf
+#docker cp nginx.conf nginx-proxy:/etc/nginx/nginx.conf
 
 # 문법 검사: Nginx에게 대본에 문제 없는지 먼저 확인받음
 docker compose exec -T nginx-proxy nginx -t
