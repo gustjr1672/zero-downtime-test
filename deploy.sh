@@ -43,7 +43,8 @@ echo "헬스 체크 진행 중 ($NEW_TARGET 내부 포트 8080 확인)"
 for i in {1..10}
 do
     # 외부 포트($NEW_PORT) 대신 docker compose exec를 사용해 컨테이너 내부 8080포트를 직접 호출
-    STATUS_CODE=$(docker compose exec -T $NEW_TARGET curl -o /dev/null -s -w "%{http_code}\n" http://localhost:8080/health)
+    #STATUS_CODE=$(docker compose exec -T $NEW_TARGET curl -o /dev/null -s -w "%{http_code}\n" http://localhost:8080/health)
+    STATUS_CODE=$(docker compose exec -T nginx-proxy curl -o /dev/null -s -w "%{http_code}\n" http://$NEW_TARGET:8080/health)
     
     if [ "$STATUS_CODE" == "200" ]; then
         echo "헬스 체크 통과!"
