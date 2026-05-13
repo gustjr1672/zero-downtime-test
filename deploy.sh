@@ -24,11 +24,27 @@ export IMAGE_TAG="v$(date +%s)"
 # 3. 새로운 타겟만 백그라운드로 빌드 및 실행 (이때 기존 타겟은 건드리지 않음)
 docker compose up -d --build $NEW_TARGET
 
-# 4. 헬스 체크
-echo "헬스 체크 진행 중... (http://localhost:$NEW_PORT/health)"
+# 4. 헬스 체크  => 주석처리 : docker-compose에서 굳이 외부포트를 열어서 헬스체크 x
+#echo "헬스 체크 진행 중... (http://localhost:$NEW_PORT/health)"
+#for i in {1..10}
+#do
+#    STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}\n" http://localhost:$NEW_PORT/health)
+#    if [ "$STATUS_CODE" == "200" ]; then
+#        echo "헬스 체크 통과!"
+#        break
+#    fi
+#    echo "대기 중... ($i/10)"
+#    sleep 2
+#done
+
+
+# 4. 헬스 체크  
+echo "헬스 체크 진행 중 ($NEW_TARGET 내부 포트 8080 확인)"
 for i in {1..10}
 do
-    STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}\n" http://localhost:$NEW_PORT/health)
+    # 외부 포트($NEW_PORT) 대신 docker compose exec를 사용해 컨테이너 내부 8080포트를 직접 호출
+    STATUS_CODE=$(docker compose exec -T $NEW_TARGET curl -o /dev/null -s -w "%{http_code}\n" http://localhost:8080/health)
+    
     if [ "$STATUS_CODE" == "200" ]; then
         echo "헬스 체크 통과!"
         break
@@ -36,6 +52,7 @@ do
     echo "대기 중... ($i/10)"
     sleep 2
 done
+
 
 echo "도커 네트워크 및 C# 앱 워밍업 대기 중... (3초)"
 sleep 3
