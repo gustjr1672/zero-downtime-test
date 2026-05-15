@@ -1,20 +1,18 @@
 #!/bin/bash
 
 # 1. 현재 Nginx가 바라보고 있는 타겟 확인
-if [ -f .env ]; then
-    # .env 파일이 있으면 LAST_TARGET 값을 읽어옴
-    CURRENT_TARGET=$(grep LAST_TARGET .env | cut -d '=' -f2)
-else
-    # .env 파일이 없으면 초기 배포(Day 1)로 간주
-    CURRENT_TARGET=""
-fi
+IS_GREEN=$(docker ps -q -f name=api-green)
 
-if [ "$CURRENT_TARGET" == "api-blue" ]; then
-    NEW_TARGET="api-green"
-    OLD_TARGET="api-blue"
-else
+if [ -n "$IS_GREEN" ]; then
+    CURRENT_TARGET="api-green"
     NEW_TARGET="api-blue"
     OLD_TARGET="api-green"
+    NEW_PORT="8080"
+else
+    CURRENT_TARGET="api-blue"
+    NEW_TARGET="api-green"
+    OLD_TARGET="api-blue"
+    NEW_PORT="8081"
 fi
 
 echo "CURRENT_TARGET=[$CURRENT_TARGET]"
