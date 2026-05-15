@@ -1,18 +1,20 @@
 #!/bin/bash
 
 # 1. 현재 Nginx가 바라보고 있는 타겟 확인
-IS_GREEN=$(docker ps -q -f name=api-green)
-
-if [ -n "$IS_GREEN" ]; then
-    CURRENT_TARGET="api-green"
-    NEW_TARGET="api-blue"
-    OLD_TARGET="api-green"
-    NEW_PORT="8080"
+if [ -f .env ]; then
+    # .env 파일이 있으면 LAST_TARGET 값을 읽어옴
+    CURRENT_TARGET=$(grep LAST_TARGET .env | cut -d '=' -f2)
 else
-    CURRENT_TARGET="api-blue"
+    # .env 파일이 없으면 초기 배포(Day 1)로 간주
+    CURRENT_TARGET=""
+fi
+
+if [ "$CURRENT_TARGET" == "api-blue" ]; then
     NEW_TARGET="api-green"
     OLD_TARGET="api-blue"
-    NEW_PORT="8081"
+else
+    NEW_TARGET="api-blue"
+    OLD_TARGET="api-green"
 fi
 
 echo "CURRENT_TARGET=[$CURRENT_TARGET]"
@@ -24,26 +26,11 @@ export IMAGE_TAG="v$(date +%s)"
 # 3. 새로운 타겟만 백그라운드로 빌드 및 실행 (이때 기존 타겟은 건드리지 않음)
 docker compose up -d --build $NEW_TARGET
 
-# 4. 헬스 체크  => 주석처리 : docker-compose에서 굳이 외부포트를 열어서 헬스체크 x
-#echo "헬스 체크 진행 중... (http://localhost:$NEW_PORT/health)"
-#for i in {1..10}
-#do
-#    STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}\n" http://localhost:$NEW_PORT/health)
-#    if [ "$STATUS_CODE" == "200" ]; then
-#        echo "헬스 체크 통과!"
-#        break
-#    fi
-#    echo "대기 중... ($i/10)"
-#    sleep 2
-#done
-
 
 # 4. 헬스 체크  
 echo "헬스 체크 진행 중 ($NEW_TARGET 내부 포트 8080 확인)"
 for i in {1..10}
 do
-    # 외부 포트($NEW_PORT) 대신 docker compose exec를 사용해 컨테이너 내부 8080포트를 직접 호출
-    #STATUS_CODE=$(docker compose exec -T $NEW_TARGET curl -o /dev/null -s -w "%{http_code}\n" http://localhost:8080/health)
     STATUS_CODE=$(docker compose exec -T nginx-proxy curl -o /dev/null -s -w "%{http_code}\n" http://$NEW_TARGET:8080/health)
     
     if [ "$STATUS_CODE" == "200" ]; then
@@ -66,15 +53,12 @@ fi
 
 # 5. Nginx 스위칭
 echo " Nginx 트래픽을 $NEW_TARGET 으로 전환합니다."
-#sed -i "s/server .*:8080;/server $NEW_TARGET:8080;/g" nginx.conf
-#sed -i 's/\r//g' nginx.conf
+
 sed "s/server .*:8080;/server $NEW_TARGET:8080;/g" nginx.conf > nginx.tmp
 cat nginx.tmp > nginx.conf
 rm nginx.tmp
 
 cat nginx.conf | docker compose exec -T nginx-proxy sh -c 'cat > /etc/nginx/nginx.conf' # 가상머신 특유의 '파일 동기화 지연(Sync Delay)' 현상 때문에 추가함
-
-#docker cp nginx.conf nginx-proxy:/etc/nginx/nginx.conf
 
 # 문법 검사: Nginx에게 대본에 문제 없는지 먼저 확인받음
 docker compose exec -T nginx-proxy nginx -t
