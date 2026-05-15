@@ -20,8 +20,10 @@ fi
 echo "CURRENT_TARGET=[$CURRENT_TARGET]"
 echo " 배포 시작: 새로운 버전($NEW_TARGET)을 준비합니다."
 
+
 # 2. 이미지 태그 생성 및 환경변수 주입 (Compose가 사용할 수 있도록)
 export IMAGE_TAG="v$(date +%s)"
+
 
 # 3. 새로운 타겟만 백그라운드로 빌드 및 실행 (이때 기존 타겟은 건드리지 않음)
 docker compose up -d --build $NEW_TARGET
