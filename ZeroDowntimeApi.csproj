@@ -18,8 +18,4 @@
     <None Include=".github\workflows\deploy.yml" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Data.Application\Data.Application.csproj" />
-  </ItemGroup>
-
 </Project>
