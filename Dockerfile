@@ -1,15 +1,21 @@
 ﻿# ==========================================
 # 1. 빌드 환경 (주방 세팅 및 요리)
-# ==========================================
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# ==========================================FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+
 WORKDIR /src
 
 # 라이브러리(패키지) 복원 - 도커 캐시를 활용해 빌드 속도 향상
-COPY ["ZeroDowntimeApi.csproj", "./"]
-RUN dotnet restore "./ZeroDowntimeApi.csproj"
+#  최상위 폴더에서 안쪽 폴더(API, Data)에 있는 프로젝트 파일을 각각 복사합니다.
+COPY ["ZeroDowntimeApi/ZeroDowntimeApi.csproj", "ZeroDowntimeApi/"]
+COPY ["Data.Application/Data.Application.csproj", "Data.Application/"]
 
-# 나머지 모든 소스 코드 복사 및 최종 빌드(Publish)
+# API 프로젝트를 복원하면, 연결된 Data.Application 도 알아서 같이 복원됩니다.
+RUN dotnet restore "ZeroDowntimeApi/ZeroDowntimeApi.csproj"
+
+# 나머지 모든 소스 코드 복사
 COPY . .
+
+WORKDIR "/src/ZeroDowntimeApi"
 RUN dotnet publish "ZeroDowntimeApi.csproj" -c Release -o /app/publish
 
 # ==========================================
