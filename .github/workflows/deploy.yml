@@ -1,8 +1,11 @@
 ﻿name: Zero-Downtime Deployment (Self-Hosted)
 
 # 언제 실행할 것인가? GitHub 웹페이지에서 수동으로 버튼을 누를 때도 실행 가능
+#workflow_dispatch:
 on:
-  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+  
 
 jobs:
   deploy:
