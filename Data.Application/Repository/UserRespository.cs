@@ -27,7 +27,7 @@ public class UserRepository : IUserRepository
         using var connection = new SqlConnection(_connectionString);
 
         // 쿼리 작성 (문자열 결합이 아닌 @Id 파라미터 사용)
-        string sql = "SELECT name FROM [user] WHERE id = @Id";
+        string sql = "SELECT name FROM [users] WHERE id = @Id";
 
         // Dapper가 내부적으로 SqlParameter를 생성하여 안전하게 바인딩해 줍니다.
         var name = await connection.QueryFirstOrDefaultAsync<string>(sql, new { Id = id });

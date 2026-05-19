@@ -17,11 +17,11 @@ public class UserController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(int id)
     {
-        // 5초 동안 여기서 대기하게 됩니다.
         var result = await _userService.GetFormattedUserNameAsync(id);
 
         return Ok(new
         {
+            Version = "V1 (Old - 5초 지연 버전)",
             Message = "성공",
             UserId = id,
             Data = result
