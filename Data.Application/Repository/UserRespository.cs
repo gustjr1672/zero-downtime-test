@@ -20,9 +20,6 @@ public class UserRepository : IUserRepository
 
     public async Task<string?> GetUserNameByIdAsync(int id)
     {
-
-        //await Task.Delay(15000);
-
         using var connection = new SqlConnection(_connectionString);
 
         // 쿼리 작성 (문자열 결합이 아닌 @Id 파라미터 사용)
