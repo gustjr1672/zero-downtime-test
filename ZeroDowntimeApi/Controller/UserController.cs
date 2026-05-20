@@ -21,7 +21,21 @@ public class UserController : ControllerBase
 
         return Ok(new
         {
-            //Version = "V1 (Old - 15초 지연 버전)",
+            Version = "V1 (Old - 15초 지연 버전)",
+            //Version = "V2 (즉시)",
+            Message = "성공",
+            UserId = id,
+            Data = result
+        });
+    }
+
+    [HttpGet("quick/{id}")]
+    public async Task<IActionResult> GetQuick(int id)
+    {
+        var result = await _userService.GetFormattedUserNameQuick(id);
+
+        return Ok(new
+        {
             Version = "V2 (즉시)",
             Message = "성공",
             UserId = id,
