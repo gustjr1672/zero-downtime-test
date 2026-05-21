@@ -2,6 +2,11 @@ using Data.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.Configure<HostOptions>(options =>
+{
+    options.ShutdownTimeout = TimeSpan.FromSeconds(65); // 도커(60초)보다 살짝 더 길게 설정
+});
+
 // 서비스에 헬스체크 추가
 builder.Services.AddHealthChecks();
 builder.Services.AddControllers();
