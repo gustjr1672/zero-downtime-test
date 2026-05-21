@@ -21,7 +21,7 @@ public class UserController : ControllerBase
 
         return Ok(new
         {
-            Version = "V1 (Old - 15초 지연 버전)",
+            Version = "V1 (Old - 30초 지연 버전)",
             //Version = "V2 (즉시)",
             Message = "성공",
             UserId = id,
