@@ -19,7 +19,7 @@ public class UserService : IUserService
     {
         var name = await _userRepository.GetUserNameByIdAsync(id);
 
-        await Task.Delay(delaySeconds);
+        await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
 
         if (string.IsNullOrEmpty(name))
         {
