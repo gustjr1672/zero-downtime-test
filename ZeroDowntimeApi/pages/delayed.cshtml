@@ -1,0 +1,71 @@
+﻿@page
+@model ZeroDowntimeApi.pages.delayedModel
+@{
+}
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>지연 API 테스트</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            min-height: 100px;
+        }
+
+        .loading {
+            color: orange;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <a href="/">⬅️ 메인으로 돌아가기</a>
+    <h2>지연 API 테스트</h2>
+    <p>조회할 User ID: <input type="number" id="userId" value="1" style="padding: 8px;"></p>
+
+    <button onclick="fetchData()">조회 (호출)</button>
+
+    <h3>응답 결과:</h3>
+    <pre id="resultArea">대기 중...</pre>
+
+    <script>async function fetchData() {
+            const id = document.getElementById('userId').value;
+            const resultArea = document.getElementById('resultArea');
+
+            resultArea.innerHTML = `<span class="loading">요청 중... 지연api</span>`;
+
+            try {
+                const response = await fetch(`/api/User/${id}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                resultArea.innerText = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultArea.innerText = `에러 발생: 통신이 끊어졌거나 서버가 죽었습니다.\n${error}`;
+                resultArea.style.color = "red";
+            }
+        }</script>
+</body>
+</html>

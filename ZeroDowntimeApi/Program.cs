@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 // 서비스에 헬스체크 추가
 builder.Services.AddHealthChecks();
 builder.Services.AddControllers();
+builder.Services.AddRazorPages();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>(); // 새로 추가됨!
@@ -15,9 +16,10 @@ var app = builder.Build();
 app.MapHealthChecks("/health");
 
 app.MapControllers();
+app.MapRazorPages();
 
 // 버전 확인을 위한 간단한 API (Blue/Green 구분용)
 //app.MapGet("/", () => "Hello! This is Version 16.0 (Blue)");
-app.MapGet("/", () => "Hello! This is Version 17.0 (Green)");
+//app.MapGet("/", () => "Hello! This is Version 17.0 (Green)");
 
 app.Run();
