@@ -14,7 +14,7 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id)
     {
         var result = await _userService.GetFormattedUserNameAsync(id);
@@ -29,7 +29,7 @@ public class UserController : ControllerBase
         });
     }
 
-    [HttpGet("quick/{id}")]
+    [HttpGet("quick/{id:int}")]
     public async Task<IActionResult> GetQuick(int id)
     {
         var result = await _userService.GetFormattedUserNameQuick(id);
