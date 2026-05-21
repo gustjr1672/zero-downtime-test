@@ -15,13 +15,13 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    public async Task<IActionResult> Get(int id)
+    public async Task<IActionResult> Get(int id, [FromQuery] int delay = 15)
     {
-        var result = await _userService.GetFormattedUserNameAsync(id);
+        var result = await _userService.GetFormattedUserNameAsync(id, delay);
 
         return Ok(new
         {
-            Version = "V1 (Old - 30초 지연 버전)",
+            Version = $"V1 (Old - {delay}초 지연 버전)",
             //Version = "V2 (즉시)",
             Message = "성공",
             UserId = id,

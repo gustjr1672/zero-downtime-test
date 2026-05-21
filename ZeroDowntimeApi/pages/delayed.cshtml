@@ -2,6 +2,7 @@
 @model ZeroDowntimeApi.pages.delayedModel
 @{
 }
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -35,26 +36,42 @@
             color: orange;
             font-weight: bold;
         }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
     <a href="/">⬅️ 메인으로 돌아가기</a>
     <h2>지연 API 테스트</h2>
-    <p>조회할 User ID: <input type="number" id="userId" value="1" style="padding: 8px;"></p>
+
+    <div class="input-group">
+        <label>조회할 User ID: </label>
+        <input type="number" id="userId" value="1" style="padding: 8px;">
+    </div>
+
+    <!-- ⭐️ 지연 시간을 입력받는 칸 추가 -->
+    <div class="input-group">
+        <label>지연 시간 (초): </label>
+        <input type="number" id="delaySeconds" value="15" style="padding: 8px;">
+    </div>
 
     <button onclick="fetchData()">조회 (호출)</button>
 
     <h3>응답 결과:</h3>
     <pre id="resultArea">대기 중...</pre>
 
-    <script>async function fetchData() {
+    <script>
+        async function fetchData() {
             const id = document.getElementById('userId').value;
+            const delay = document.getElementById('delaySeconds').value;
             const resultArea = document.getElementById('resultArea');
 
-            resultArea.innerHTML = `<span class="loading">요청 중... 지연api</span>`;
+            resultArea.innerHTML = `<span class="loading">요청 중... ${delay}초를 기다리는 중</span>`;
 
             try {
-                const response = await fetch(`/api/User/${id}`);
+                const response = await fetch(`/api/User/${id}?delay=${delay}`);
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -66,6 +83,7 @@
                 resultArea.innerText = `에러 발생: 통신이 끊어졌거나 서버가 죽었습니다.\n${error}`;
                 resultArea.style.color = "red";
             }
-        }</script>
+        }
+    </script>
 </body>
 </html>

@@ -2,7 +2,7 @@
 
 public interface IUserService
 {
-    Task<string> GetFormattedUserNameAsync(int id);
+    Task<string> GetFormattedUserNameAsync(int id, int delaySeconds = 15);
     Task<string> GetFormattedUserNameQuick(int id);
 }
 
@@ -15,11 +15,11 @@ public class UserService : IUserService
         _userRepository = userRepository;
     }
 
-    public async Task<string> GetFormattedUserNameAsync(int id)
+    public async Task<string> GetFormattedUserNameAsync(int id, int delaySeconds = 15)
     {
         var name = await _userRepository.GetUserNameByIdAsync(id);
 
-        await Task.Delay(30000);
+        await Task.Delay(delaySeconds);
 
         if (string.IsNullOrEmpty(name))
         {
