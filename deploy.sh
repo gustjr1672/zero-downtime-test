@@ -71,7 +71,23 @@ sleep 2
 
 # 6. 구버전 내리기
 echo " 트래픽 전환 완료. 구버전($OLD_TARGET)을 종료합니다."
-docker compose stop $OLD_TARGET
+docker compose stop $OLD_TARGET &
+
+# 6-1. 구버전 내려가는지 시간초 확인
+STOP_PID=$!
+
+# 초시계 변수 초기화
+ELAPSED=0
+
+# 해당 프로세스가 살아있는 동안 1초씩 대기하며 타이머 출력
+while kill -0 $STOP_PID 2>/dev/null; do
+    echo -ne "\r⏳ 처리 중인 남은 요청을 기다리는 중... ${ELAPSED}초 경과\t"
+    sleep 1
+    ((ELAPSED++))
+done
+
+# 종료 완료 메시지 출력
+echo -e "\n✅ $OLD_TARGET 종료가 완벽하게 완료되었습니다! (총 ${ELAPSED}초 소요)"
 
 
 #재부팅 시에 last버전을 볼 수 있도록 env파일에 기록
