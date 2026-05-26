@@ -3,7 +3,7 @@ name: Zero-Downtime Deployment (Self-Hosted)
 # 언제 실행할 것인가?
 on:
   push:
-    branches: [ "devlop" ] # main 브랜치에 코드가 들어올 때 자동 실행
+    branches: [ "develop" ] # main 브랜치에 코드가 들어올 때 자동 실행
   workflow_dispatch:     # GitHub 웹페이지에서 수동으로 버튼을 누를 때도 실행 가능 (살려두는 것을 강력 추천합니다!)
 
 jobs:
