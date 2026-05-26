@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: [self-hosted, prod]
 
     steps:
       # 1. GitHub 창고에 있는 최신 코드를 가상머신(로봇의 현재 폴더)으로 다운로드
