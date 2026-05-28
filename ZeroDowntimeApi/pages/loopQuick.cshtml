@@ -1,0 +1,279 @@
+@page
+@model ZeroDowntimeApi.pages.quickModel
+@{
+}
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>연속 API 스트레스 테스트</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 750px;
+            margin: 40px auto;
+            padding: 0 20px;
+            color: #333;
+        }
+
+        .nav-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .control-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .status-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .status-card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid #ced4da;
+        }
+
+            .status-card.success {
+                border-left: 5px solid #28a745;
+            }
+
+            .status-card.failure {
+                border-left: 5px solid #dc3545;
+            }
+
+            .status-card.progress-info {
+                border-left: 5px solid #007bff;
+            }
+
+        .count-num {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        input[type="number"] {
+            padding: 8px;
+            width: 80px;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        #btnStart {
+            background-color: #007bff;
+        }
+
+            #btnStart:hover {
+                background-color: #0056b3;
+            }
+
+        /* ⭐️ 중지 버튼 전용 빨간색 스타일 선언 */
+        #btnStop {
+            background-color: #dc3545;
+        }
+
+            #btnStop:hover {
+                background-color: #bd2130;
+            }
+
+        button:disabled {
+            background-color: #6c757d !important;
+            cursor: not-allowed;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-y: auto;
+            height: 400px;
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .version-text {
+            color: #f1c40f;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="nav-link">⬅️ 메인으로 돌아가기</a>
+    <h2>⚡ 연속 API 무중단 배포 검증 테스트 (제어 센터)</h2>
+    <p>요청 횟수를 지정하여 호출을 제어하고, 배포 순간 버전이 교체되는 과정을 추적합니다.</p>
+
+    <div class="control-panel">
+        <div>
+            <label style="font-weight: bold;">User ID: </label>
+            <input type="number" id="userId" value="1">
+        </div>
+
+        <div>
+            <label style="font-weight: bold; margin-left: 10px;">반복 횟수: </label>
+            <input type="number" id="requestCount" value="100" min="1" max="10000">
+        </div>
+
+        <button id="btnStart" onclick="runStressTest()" style="margin-left: 10px;">🚀 테스트 시작</button>
+        <button id="btnStop" onclick="stopStressTest()" disabled style="margin-left: 5px;">⏱️ 테스트 중지</button>
+
+        <div class="status-board">
+            <div class="status-card progress-info">
+                <div>진행률</div>
+                <div class="count-num" id="progressArea">0 / 0</div>
+            </div>
+            <div class="status-card success">
+                <div style="color: #28a745;">성공 (200)</div>
+                <div class="count-num" id="successCount" style="color: #28a745;">0</div>
+            </div>
+            <div class="status-card failure">
+                <div style="color: #dc3545;">실패 / 에러</div>
+                <div class="count-num" id="failureCount" style="color: #dc3545;">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="log-header">
+        <h3 style="margin: 0;">실시간 호출 로그 (버전 추적)</h3>
+        <button onclick="clearLog()" style="padding: 6px 12px; font-size: 13px; background-color: #6c757d;">🗑️ 로그 지우기</button>
+    </div>
+    <pre id="logArea">대기 중... 테스트 시작 버튼을 누르면 실시간 로그가 출력됩니다.</pre>
+
+    <script>
+        // ⭐️ 글로벌 제어용 중지 플래그 선언
+        let shouldStop = false;
+
+        function clearLog() {
+            document.getElementById('logArea').innerHTML = '대기 중...';
+        }
+
+        // ⭐️ 중지 버튼 클릭 시 호출되는 함수
+        function stopStressTest() {
+            shouldStop = true;
+            const btnStop = document.getElementById('btnStop');
+            btnStop.disabled = true;
+            btnStop.innerText = "중지 요청됨...";
+        }
+
+        async function runStressTest() {
+            const id = document.getElementById('userId').value;
+            const totalRequests = parseInt(document.getElementById('requestCount').value, 10) || 100;
+
+            const btnStart = document.getElementById('btnStart');
+            const btnStop = document.getElementById('btnStop');
+            const logArea = document.getElementById('logArea');
+            const progressArea = document.getElementById('progressArea');
+            const successArea = document.getElementById('successCount');
+            const failureArea = document.getElementById('failureCount');
+
+            // ⭐️ 시작할 때 중지 플래그 초기화 및 버튼 토글
+            shouldStop = false;
+            btnStart.disabled = true;
+            btnStart.innerText = "테스트 진행 중...";
+            btnStop.disabled = false;
+            btnStop.innerText = "⏱️ 테스트 중지";
+
+            logArea.innerHTML = '';
+
+            let successCount = 0;
+            let failureCount = 0;
+            let currentVersion = null;
+
+            progressArea.innerText = `0 / ${totalRequests}`;
+            successArea.innerText = "0";
+            failureArea.innerText = "0";
+
+            logArea.innerHTML += `🚀 [시작] 총 ${totalRequests}회 연속 테스트를 가동합니다.\n\n`;
+
+            for (let i = 1; i <= totalRequests; i++) {
+                // ⭐️ 매 루프의 시작점마다 중지 요청이 들어왔는지 확인
+                if (shouldStop) {
+                    logArea.innerHTML += `\n🛑 [중지] 사용자에 의해 테스트가 강제 중지되었습니다.\n`;
+                    break;
+                }
+
+                const timestamp = new Date().toLocaleTimeString('ko-KR', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 });
+
+                try {
+                    const response = await fetch(`/api/User/quick/${id}`);
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        const apiVersion = data.version || data.Version || "버전 정보 없음";
+
+                        successCount++;
+
+                        let versionLog = `<span class="version-text">[Ver: ${apiVersion}]</span>`;
+                        if (currentVersion !== null && currentVersion !== apiVersion) {
+                            versionLog = `<span style="color: #00ff00; font-weight: bold; font-size: 15px;">🔄 스위칭 감지! [${currentVersion} ➔ ${apiVersion}]</span>`;
+                        }
+                        currentVersion = apiVersion;
+
+                        logArea.innerHTML += `[${timestamp}] [#${String(i).padStart(3, '0')}] ✅ 성공 ${versionLog}\n`;
+                    } else {
+                        failureCount++;
+                        logArea.innerHTML += `[${timestamp}] [#${String(i).padStart(3, '0')}] <span style="color: #ff5555;">❌ 실패 (HTTP ${response.status})</span>\n`;
+                    }
+                } catch (error) {
+                    failureCount++;
+                    logArea.innerHTML += `[${timestamp}] [#${String(i).padStart(3, '0')}] <span style="color: #ff5555;">💥 에러 발생: ${error.message}</span>\n`;
+                }
+
+                progressArea.innerText = `${i} / ${totalRequests}`;
+                successArea.innerText = successCount;
+                failureArea.innerText = failureCount;
+
+                logArea.scrollTop = logArea.scrollHeight;
+
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+
+            // 모든 테스트가 끝나거나 중간에 break 되었을 때 UI 복구
+            if (!shouldStop) {
+                logArea.innerHTML += `\n🏁 [종료] 모든 지정 횟수 호출이 완료되었습니다.\n`;
+            }
+
+            btnStart.innerText = "🚀 테스트 시작";
+            btnStart.disabled = false;
+            btnStop.disabled = true; // 대기 상태일 때는 중지 버튼 비활성화
+            btnStop.innerText = "⏱️ 테스트 중지";
+        }
+    </script>
+</body>
+</html>
