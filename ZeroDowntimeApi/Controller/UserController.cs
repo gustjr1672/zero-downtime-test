@@ -21,7 +21,7 @@ public class UserController : ControllerBase
 
         return Ok(new
         {
-            Version = $"{delay}초 지연 버전 V2)",
+            Version = $"{delay}초 지연 버전 V3)",
             Message = "성공",
             UserId = id,
             Data = result
@@ -35,7 +35,7 @@ public class UserController : ControllerBase
 
         return Ok(new
         {
-            Version = "quick (즉시) V2",
+            Version = "quick (즉시) V3",
             Message = "성공",
             UserId = id,
             Data = result
