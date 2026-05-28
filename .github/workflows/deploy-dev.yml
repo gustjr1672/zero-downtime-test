@@ -27,8 +27,6 @@ jobs:
           # 2-2. 스크립트에 실행 권한 부여
           chmod +x deploy.sh
           
-          exit 1
-          
           # 2-3. 쉘 스크립트 실행 (이 안에서 도커 빌드, 무중단 스위칭, DB 주소 전달이 모두 일어납니다)
           bash deploy.sh
 
